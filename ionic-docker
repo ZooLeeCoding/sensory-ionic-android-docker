@@ -1,0 +1,30 @@
+FROM marcoturi/ionic
+
+ARG store_pass
+ARG key_pass
+ARG alias
+
+WORKDIR /opt
+
+RUN gradle
+RUN gradle --status
+
+RUN echo $store_pass
+
+ENV _JAVA_OPTIONS="-Xmx512M"
+
+RUN apt-get install git
+RUN git clone https://$gituseruser:$pw@***.git
+RUN git clone https://$gituser:$pw@***.git
+
+WORKDIR /opt/***/ionicapp
+RUN npm install
+
+RUN ionic cordova build --release android
+WORKDIR /opt/***/ionicapp/platforms/android/build/outputs/apk
+
+RUN jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore /opt/*roadtokey* -storepass $store_pass -keypass $key_pass android-release-unsigned.apk $alias
+
+RUN /opt/android-sdk-linux/build-tools/25.0.2/zipalign -v 4 android-release-unsigned.apk release.apk
+
+CMD cp -R ../apk /opt/build
